@@ -105,6 +105,8 @@ class AnyOfFilter(MultipleChoiceFilter):
             query_filter = Q(**predicate)
             qs = self.get_method(qs)(query_filter)
 
+        # distinct_fields = getattr(qs, "distinct_fields", [])
+        # return qs.distinct(*distinct_fields) if self.distinct else qs
         return qs.distinct() if self.distinct else qs
 
 

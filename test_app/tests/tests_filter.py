@@ -313,3 +313,21 @@ class TestAnyOfFilter(BaseApiTest):
         target_ids = sorted([t.id for t in target_teachers])
         result_ids = sorted([r["id"] for r in results])
         self.assertEqual(target_ids, result_ids)
+
+    # TODO: figure out why this is not working. The test is failing, even though the queryset
+    # is applying `distinct` on all fields.
+    def test_filter_with_distinct_queryset(self):
+        teachers = TeacherFactory.create_batch(5, age=20, is_ghost=False)
+        target_teachers = teachers[:2]
+
+        url = f"{self.url}/of_age"
+        data = {"id": [t.pk for t in target_teachers]}
+        response = self.client.get(url, data=data)
+
+        self.assertEqual(200, response.status_code)
+        results = response.json()
+        self.assertEqual(2, len(results))
+
+        target_ids = sorted([t.id for t in target_teachers])
+        result_ids = sorted([r["id"] for r in results])
+        self.assertEqual(target_ids, result_ids)

@@ -1,5 +1,6 @@
 from django.db.models import Count
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from drf_kit.views import (
@@ -36,6 +37,12 @@ class TeacherViewSet(CachedSearchableModelViewSet):
     serializer_class = serializers.TeacherSerializer
     filterset_class = filters.TeacherFilterSet
     ordering_fields = ("name", "id")
+
+    @action(detail=False, methods=["get"])
+    def of_age(self, request):
+        queryset = self.filter_queryset(self.get_queryset().filter(age__gte=18).distinct("age"))
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class WizardViewSet(ModelViewSet):
