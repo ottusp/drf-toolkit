@@ -282,3 +282,34 @@ class TestCallableInitialFilter(BaseApiTest):
         expected_ids = [b.pk for b in beasts]
         result_ids = [r["id"] for r in results]
         self.assertEqual(expected_ids, list(reversed(result_ids)))
+
+
+class TestAnyOfFilter(BaseApiTest):
+    url = "/teachers"
+
+    def test_filter_with_single_value(self):
+        teachers = TeacherFactory.create_batch(5)
+        target_teacher = teachers[0]
+
+        data = {"id": target_teacher.pk}
+        response = self.client.get(self.url, data=data)
+
+        self.assertEqual(200, response.status_code)
+        results = response.json()["results"]
+        self.assertEqual(1, len(results))
+        self.assertEqual(target_teacher.id, results[0]["id"])
+
+    def test_filter_with_multiple_values(self):
+        teachers = TeacherFactory.create_batch(5)
+        target_teachers = teachers[:2]
+
+        data = {"id": [t.pk for t in target_teachers]}
+        response = self.client.get(self.url, data=data)
+
+        self.assertEqual(200, response.status_code)
+        results = response.json()["results"]
+        self.assertEqual(2, len(results))
+
+        target_ids = sorted([t.id for t in target_teachers])
+        result_ids = sorted([r["id"] for r in results])
+        self.assertEqual(target_ids, result_ids)
